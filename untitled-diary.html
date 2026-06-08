@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Untitled</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================
+   UNTITLED — Mind Reflection Diary
+   ============================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ivory:        #FAFAF5;
+  --ivory-2:      #F4F4EC;
+  --navy:         #0D1B2A;
+  --navy-soft:    #1A2E45;
+  --navy-muted:   #2D4A6B;
+  --charcoal:     #1C1C1E;
+  --charcoal-soft:#3A3A3C;
+  --muted:        #8A8A8E;
+  --muted-light:  #BCBCBE;
+  --gold:         #C9A84C;
+  --white:        #FFFFFF;
+  --shadow-sm:    0 2px 12px rgba(13,27,42,0.06);
+  --shadow-md:    0 8px 32px rgba(13,27,42,0.10);
+  --shadow-lg:    0 24px 64px rgba(13,27,42,0.18);
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'DM Sans', -apple-system, sans-serif;
+  --ease:         0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+html, body { width:100%; height:100%; overflow:hidden; }
+
+body {
+  background: var(--ivory);
+  color: var(--charcoal);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  position: relative;
+  user-select: none;
+}
+
+/* ── Grain ── */
+.grain {
+  position:fixed; inset:0; z-index:1; pointer-events:none;
+  opacity:0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:128px 128px;
+}
+
+/* ── Ambient orbs ── */
+.ambient { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+.orb { position:absolute; border-radius:50%; filter:blur(80px); }
+.orb-1 {
+  width:600px; height:600px; top:-200px; left:-100px; opacity:.07;
+  background: radial-gradient(circle,#0D1B2A 0%,transparent 70%);
+  animation: od1 28s ease-in-out infinite alternate;
+}
+.orb-2 {
+  width:400px; height:400px; bottom:-100px; right:-100px; opacity:.07;
+  background: radial-gradient(circle,#2D4A6B 0%,transparent 70%);
+  animation: od2 22s ease-in-out infinite alternate;
+}
+.orb-3 {
+  width:300px; height:300px; top:40%; right:15%; opacity:.04;
+  background: radial-gradient(circle,#C9A84C 0%,transparent 70%);
+  animation: od3 35s ease-in-out infinite alternate;
+}
+@keyframes od1 { from{transform:translate(0,0)} to{transform:translate(80px,120px)} }
+@keyframes od2 { from{transform:translate(0,0)} to{transform:translate(-60px,-80px)} }
+@keyframes od3 { from{transform:translate(0,0) scale(1)} to{transform:translate(-40px,60px) scale(1.2)} }
+
+/* ── Header ── */
+.app-header {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 32px 16px;
+  background: linear-gradient(to bottom, var(--ivory) 70%, transparent);
+  pointer-events:none;
+}
+.logo { pointer-events:all; display:flex; flex-direction:column; }
+.logo-title { font-family:var(--font-display); font-size:28px; font-weight:300; letter-spacing:-0.02em; color:var(--navy); line-height:1; }
+.logo-sub   { font-size:10px; font-weight:400; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-top:2px; }
+.header-actions { display:flex; gap:8px; pointer-events:all; }
+.icon-btn {
+  width:38px; height:38px; border-radius:50%;
+  border:1px solid rgba(13,27,42,.1);
+  background:rgba(250,250,245,.85); backdrop-filter:blur(8px);
+  color:var(--charcoal-soft); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:var(--ease);
+}
+.icon-btn svg { width:16px; height:16px; }
+.icon-btn:hover { background:var(--navy); color:var(--ivory); border-color:transparent; transform:scale(1.05); }
+
+/* ── Daily reflection ── */
+.daily-reflection {
+  position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+  z-index:90; text-align:center; pointer-events:none;
+  opacity:0; transition:opacity .8s ease;
+  max-width:420px; width:90%;
+}
+.daily-reflection.visible { opacity:1; }
+.daily-label { display:block; font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.daily-text  { font-family:var(--font-display); font-size:16px; font-style:italic; font-weight:300; color:var(--navy-muted); line-height:1.7; border-top:1px solid rgba(13,27,42,.1); padding-top:10px; }
+
+/* ── Canvas ── */
+.canvas { position:fixed; inset:0; z-index:10; overflow:hidden; pointer-events:none; }
+
+/* ── Floating thoughts ── */
+.floating-thought {
+  position:absolute; pointer-events:all; cursor:pointer;
+  padding:10px 18px; border-radius:40px;
+  max-width:280px; min-width:80px;
+  transition:opacity .3s ease;
+  animation: tFloat linear infinite;
+  will-change:transform;
+  backdrop-filter:blur(4px);
+}
+.floating-thought:hover { transform:scale(1.06) !important; z-index:20; }
+
+.style-ghost   { background:rgba(13,27,42,.04); border:1px solid rgba(13,27,42,.08); color:var(--charcoal); }
+.style-ink     { background:rgba(13,27,42,.88); color:var(--ivory); }
+.style-outline { background:transparent; border:1px solid rgba(13,27,42,.2); color:var(--charcoal-soft); }
+.style-glow    { background:rgba(250,250,245,.9); border:1px solid rgba(201,168,76,.3); color:var(--navy); box-shadow:0 0 24px rgba(201,168,76,.15); }
+.floating-thought.pinned { border-color:rgba(201,168,76,.5)!important; box-shadow:0 0 30px rgba(201,168,76,.2),0 4px 16px rgba(13,27,42,.08)!important; }
+
+.thought-inner {
+  font-family:var(--font-display); font-size:14px; font-weight:400; line-height:1.55;
+  overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;
+}
+.floating-thought.pinned  .thought-inner { font-size:16px; }
+.floating-thought.size-sm .thought-inner { font-size:12px; }
+.floating-thought.size-md .thought-inner { font-size:14px; }
+.floating-thought.size-lg .thought-inner { font-size:17px; font-style:italic; }
+
+.pin-dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--gold); margin-right:6px; vertical-align:middle; }
+
+/* ── FAB ── */
+.fab {
+  position:fixed; bottom:32px; right:32px; z-index:200;
+  width:56px; height:56px; border-radius:50%;
+  background:var(--navy); color:var(--ivory); border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 24px rgba(13,27,42,.35);
+  transition:var(--ease);
+}
+.fab:hover { background:var(--navy-soft); transform:scale(1.08) rotate(90deg); box-shadow:0 8px 32px rgba(13,27,42,.4); }
+.fab svg   { width:22px; height:22px; }
+
+/* ── Add/Edit Modal ── */
+.modal-overlay {
+  position:fixed; inset:0; z-index:500;
+  display:flex; align-items:flex-end; justify-content:center;
+  background:rgba(13,27,42,.25); backdrop-filter:blur(8px);
+  opacity:0; pointer-events:none;
+  transition:opacity .35s ease;
+  padding:24px;
+}
+.modal-overlay.open { opacity:1; pointer-events:all; }
+.modal {
+  background:var(--white); border-radius:24px 24px 16px 16px;
+  padding:28px; width:100%; max-width:520px;
+  box-shadow:var(--shadow-lg);
+  transform:translateY(40px);
+  transition:transform .4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.modal-overlay.open .modal { transform:translateY(0); }
+.modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.modal-label  { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); font-weight:500; }
+.modal-close  {
+  width:30px; height:30px; border-radius:50%;
+  border:1px solid rgba(13,27,42,.1); background:transparent;
+  color:var(--muted); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:var(--ease);
+}
+.modal-close:hover { background:var(--charcoal); color:var(--white); border-color:transparent; }
+.modal-close svg { width:14px; height:14px; }
+.thought-input {
+  width:100%; background:var(--ivory);
+  border:1px solid rgba(13,27,42,.08); border-radius:14px;
+  padding:16px 18px;
+  font-family:var(--font-display); font-size:18px; font-weight:300; line-height:1.65;
+  color:var(--charcoal); resize:none; outline:none;
+  transition:border-color .25s; user-select:text;
+}
+.thought-input::placeholder { color:var(--muted-light); font-style:italic; }
+.thought-input:focus { border-color:rgba(13,27,42,.25); }
+.modal-footer { display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
+.char-count { font-size:12px; color:var(--muted); }
+.save-btn {
+  background:var(--navy); color:var(--ivory);
+  border:none; border-radius:100px; padding:10px 24px;
+  font-family:var(--font-body); font-size:13px; font-weight:500; letter-spacing:.02em;
+  cursor:pointer; transition:var(--ease);
+}
+.save-btn:hover { background:var(--navy-soft); transform:translateY(-1px); box-shadow:0 4px 16px rgba(13,27,42,.25); }
+.save-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+
+/* ── Focus / Detail ── */
+.focus-overlay {
+  position:fixed; inset:0; z-index:600;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(13,27,42,.4); backdrop-filter:blur(16px);
+  opacity:0; pointer-events:none;
+  transition:opacity .35s ease; padding:24px;
+}
+.focus-overlay.open { opacity:1; pointer-events:all; }
+.focus-card {
+  background:var(--white); border-radius:24px;
+  padding:40px 40px 32px; max-width:500px; width:100%;
+  box-shadow:var(--shadow-lg);
+  transform:scale(.92) translateY(20px);
+  transition:transform .4s cubic-bezier(0.34,1.2,0.64,1);
+}
+.focus-overlay.open .focus-card { transform:scale(1) translateY(0); }
+.focus-meta {
+  font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:20px;
+  display:flex; align-items:center; gap:10px;
+}
+.pin-badge { color:var(--gold); }
+.focus-text {
+  font-family:var(--font-display); font-size:24px; font-weight:300;
+  line-height:1.65; color:var(--navy);
+  border-left:2px solid var(--navy); padding-left:20px;
+  margin-bottom:32px; font-style:italic; quotes:none;
+}
+.focus-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.focus-btn {
+  display:flex; align-items:center; gap:6px;
+  padding:9px 18px; border-radius:100px;
+  border:1px solid rgba(13,27,42,.12); background:transparent;
+  font-family:var(--font-body); font-size:13px; font-weight:400;
+  color:var(--charcoal-soft); cursor:pointer; transition:var(--ease);
+}
+.focus-btn:hover   { background:var(--ivory); border-color:rgba(13,27,42,.2); }
+.pin-btn.active    { color:var(--gold); border-color:rgba(201,168,76,.4); }
+.delete-btn:hover  { background:#FFF1F1; border-color:#E57373; color:#C62828; }
+.close-focus-btn   { margin-left:auto; background:var(--navy); color:var(--ivory); border-color:transparent; }
+.close-focus-btn:hover { background:var(--navy-soft); }
+
+/* ── Search ── */
+.search-panel {
+  position:fixed; top:0; left:0; right:0; z-index:400;
+  padding:80px 24px 24px;
+  background:linear-gradient(to bottom,var(--ivory) 80%,transparent);
+  transform:translateY(-100%);
+  transition:transform .4s cubic-bezier(0.4,0,.2,1);
+  pointer-events:none;
+}
+.search-panel.open { transform:translateY(0); pointer-events:all; }
+.search-inner { max-width:520px; margin:0 auto; }
+.search-input {
+  width:100%; padding:14px 20px; border-radius:100px;
+  border:1.5px solid rgba(13,27,42,.15); background:var(--white);
+  font-family:var(--font-body); font-size:15px; color:var(--charcoal);
+  outline:none; box-shadow:var(--shadow-sm); transition:border-color .25s; user-select:text;
+}
+.search-input:focus { border-color:rgba(13,27,42,.35); }
+.search-results { margin-top:12px; max-height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+.search-result-item {
+  background:var(--white); border:1px solid rgba(13,27,42,.08);
+  border-radius:14px; padding:14px 18px; cursor:pointer;
+  transition:var(--ease); box-shadow:var(--shadow-sm);
+}
+.search-result-item:hover { border-color:rgba(13,27,42,.2); transform:translateX(4px); }
+.search-result-text { font-family:var(--font-display); font-size:15px; font-style:italic; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.search-result-date { font-size:11px; color:var(--muted); margin-top:4px; }
+.search-empty { text-align:center; color:var(--muted); font-size:13px; padding:20px; }
+
+/* ── Focus Mode ── */
+.focus-mode-overlay {
+  position:fixed; inset:0; z-index:700; background:var(--navy);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none;
+  transition:opacity .6s ease; padding:40px;
+}
+.focus-mode-overlay.active { opacity:1; pointer-events:all; }
+.focus-mode-content { text-align:center; max-width:600px; }
+.focus-mode-label { display:block; font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:rgba(250,250,245,.3); margin-bottom:32px; }
+.focus-mode-thought {
+  font-family:var(--font-display); font-size:36px; font-weight:300; font-style:italic;
+  color:var(--ivory); line-height:1.6; margin-bottom:48px;
+  opacity:0; transform:translateY(16px);
+  animation:fmReveal .8s .2s cubic-bezier(0.4,0,.2,1) forwards;
+}
+@keyframes fmReveal { to { opacity:1; transform:translateY(0); } }
+.focus-mode-exit {
+  background:transparent; border:1px solid rgba(250,250,245,.2);
+  color:rgba(250,250,245,.5); border-radius:100px; padding:10px 28px;
+  font-family:var(--font-body); font-size:12px; letter-spacing:.1em;
+  cursor:pointer; transition:var(--ease);
+}
+.focus-mode-exit:hover { border-color:rgba(250,250,245,.5); color:var(--ivory); }
+
+/* ── Empty state ── */
+.empty-state {
+  position:fixed; inset:0; z-index:5;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  pointer-events:none; opacity:1; transition:opacity .5s ease;
+}
+.empty-state.hidden { opacity:0; }
+.empty-icon { font-size:64px; color:var(--muted-light); line-height:1; animation:ePulse 3s ease-in-out infinite; }
+@keyframes ePulse { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:.8;transform:scale(1.05)} }
+.empty-title { font-family:var(--font-display); font-size:22px; font-weight:300; font-style:italic; color:var(--muted); }
+.empty-sub   { font-size:13px; color:var(--muted-light); letter-spacing:.02em; }
+
+/* ── Toast ── */
+.toast {
+  position:fixed; bottom:100px; left:50%;
+  transform:translateX(-50%) translateY(20px);
+  z-index:900; background:var(--charcoal); color:var(--ivory);
+  padding:10px 22px; border-radius:100px;
+  font-size:13px; letter-spacing:.02em;
+  opacity:0; transition:opacity .3s ease,transform .3s ease;
+  pointer-events:none; white-space:nowrap;
+}
+.toast.visible { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ── Float keyframes ── */
+@keyframes tFloat {
+  0%   { transform: translate(0,0)               rotate(var(--rs)); }
+  25%  { transform: translate(var(--dx1),var(--dy1)) rotate(var(--rm)); }
+  50%  { transform: translate(var(--dx2),var(--dy2)) rotate(var(--rs)); }
+  75%  { transform: translate(var(--dx3),var(--dy3)) rotate(var(--rm)); }
+  100% { transform: translate(0,0)               rotate(var(--rs)); }
+}
+@keyframes tFadeIn {
+  from { opacity:0; transform:scale(.7) translateY(20px); }
+  to   { opacity:1; transform:scale(1)  translateY(0);    }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track  { background:transparent; }
+::-webkit-scrollbar-thumb  { background:rgba(13,27,42,.15); border-radius:100px; }
+
+/* ── Responsive ── */
+@media(max-width:600px){
+  .app-header  { padding:16px 20px 12px; }
+  .logo-title  { font-size:22px; }
+  .focus-card  { padding:28px 24px 24px; }
+  .focus-text  { font-size:20px; }
+  .focus-mode-thought { font-size:26px; }
+  .fab { bottom:24px; right:24px; }
+  .floating-thought { max-width:220px; }
+  .thought-inner { font-size:13px!important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Grain -->
+<div class="grain"></div>
+
+<!-- Ambient orbs -->
+<div class="ambient">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- Header -->
+<header class="app-header">
+  <div class="logo">
+    <span class="logo-title">Untitled</span>
+    <span class="logo-sub">mind reflection</span>
+  </div>
+  <div class="header-actions">
+    <button class="icon-btn" id="searchToggle" title="Search thoughts">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+    <button class="icon-btn" id="focusModeBtn" title="Focus mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M3 12h2M19 12h2M12 3v2M12 19v2"/></svg>
+    </button>
+    <button class="icon-btn" id="exportBtn" title="Export thoughts">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- Daily reflection -->
+<div class="daily-reflection" id="dailyReflection">
+  <span class="daily-label">today's reflection</span>
+  <p class="daily-text" id="dailyText"></p>
+</div>
+
+<!-- Floating canvas -->
+<div class="canvas" id="canvas"></div>
+
+<!-- Empty state -->
+<div class="empty-state" id="emptyState">
+  <div class="empty-icon">◦</div>
+  <p class="empty-title">Your mind is quiet</p>
+  <p class="empty-sub">Capture a thought before it drifts away</p>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="addBtn" title="Add a thought">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- Add / Edit Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <span class="modal-label" id="modalLabel">new thought</span>
+      <button class="modal-close" id="modalClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <textarea id="thoughtInput" class="thought-input"
+      placeholder="What do you believe in your strongest moments?"
+      maxlength="280" rows="5" spellcheck="false"></textarea>
+    <div class="modal-footer">
+      <span class="char-count" id="charCount">0 / 280</span>
+      <button class="save-btn" id="saveBtn" disabled>Save Thought</button>
+    </div>
+  </div>
+</div>
+
+<!-- Focus / Detail -->
+<div class="focus-overlay" id="focusOverlay">
+  <div class="focus-card">
+    <div class="focus-meta" id="focusMeta"></div>
+    <blockquote class="focus-text" id="focusText"></blockquote>
+    <div class="focus-actions">
+      <button class="focus-btn pin-btn" id="pinBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+        <span id="pinLabel">Pin</span>
+      </button>
+      <button class="focus-btn" id="editBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+      <button class="focus-btn delete-btn" id="deleteBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Delete
+      </button>
+      <button class="focus-btn close-focus-btn" id="closeFocusBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Search panel -->
+<div class="search-panel" id="searchPanel">
+  <div class="search-inner">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search your thoughts…" />
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<!-- Focus mode -->
+<div class="focus-mode-overlay" id="focusModeOverlay">
+  <div class="focus-mode-content">
+    <span class="focus-mode-label">focus</span>
+    <p class="focus-mode-thought" id="focusModeThought"></p>
+    <button class="focus-mode-exit" id="focusModeExit">return to thoughts</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════
+   STORE
+════════════════════════════════════════════ */
+const Store = (() => {
+  const KEY = 'untitled_v2';
+  const load    = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
+  const persist = d => localStorage.setItem(KEY, JSON.stringify(d));
+  const add = text => {
+    const all = load();
+    const t = { id: Date.now().toString(36) + Math.random().toString(36).slice(2), text: text.trim(), timestamp: new Date().toISOString(), pinned: false };
+    all.unshift(t); persist(all); return t;
+  };
+  const update = (id, ch) => { const all = load(), i = all.findIndex(t => t.id === id); if (i < 0) return null; all[i] = {...all[i], ...ch}; persist(all); return all[i]; };
+  const remove = id => persist(load().filter(t => t.id !== id));
+  const byId   = id => load().find(t => t.id === id) || null;
+  return { load, add, update, remove, byId };
+})();
+
+/* ════════════════════════════════════════════
+   FLOAT ENGINE
+════════════════════════════════════════════ */
+const Float = (() => {
+  const canvas = document.getElementById('canvas');
+  const live   = new Map(); // id → el
+  let W = innerWidth, H = innerHeight;
+  addEventListener('resize', () => { W = innerWidth; H = innerHeight; });
+
+  const STYLES = ['style-ghost','style-ink','style-outline','style-glow'];
+  const SIZES  = ['size-sm','size-sm','size-md','size-md','size-lg'];
+
+  function styleFor(t) {
+    if (t.pinned) return 'style-glow';
+    const age = (Date.now() - +new Date(t.timestamp)) / 86400000;
+    if (age < 1) return Math.random() > .5 ? 'style-ink'   : 'style-glow';
+    if (age < 3) return Math.random() > .5 ? 'style-ghost' : 'style-ink';
+    return Math.random() > .5 ? 'style-ghost' : 'style-outline';
+  }
+
+  function animFor(t) {
+    const dr = t.pinned ? 26 : 46;
+    const r  = () => ((Math.random() - .5) * 2 * dr).toFixed(1) + 'px';
+    const rr = t.pinned ? .4 : 1.2;
+    const rs = ((Math.random() - .5) * rr).toFixed(2) + 'deg';
+    const rm = ((Math.random() - .5) * rr).toFixed(2) + 'deg';
+    const age = (Date.now() - +new Date(t.timestamp)) / 86400000;
+    const base = t.pinned ? 26 : age < 1 ? 14 : age < 5 ? 20 : 28;
+    const dur  = (base + Math.random() * 14).toFixed(1);
+    const del  = (-(Math.random() * +dur)).toFixed(1);
+    return { dx1:r(), dy1:r(), dx2:r(), dy2:r(), dx3:r(), dy3:r(), rs, rm, dur, del };
+  }
+
+  function posFor(t) {
+    const rects = []; live.forEach(n => { const r = n.getBoundingClientRect(); rects.push(r); });
+    const top = 90, bot = H - 110, pad = 24;
+    let x, y, att = 0;
+    do {
+      x = t.pinned ? W*.15 + Math.random()*W*.7 : pad + Math.random()*(W - pad*2 - 240);
+      y = t.pinned ? top + H*.1 + Math.random()*(bot-top-H*.25) : top + Math.random()*(bot-top);
+      att++;
+    } while (att < 20 && rects.some(r => x < r.right+16 && x+200 > r.left-16 && y < r.bottom+10 && y+56 > r.top-10));
+    return { x, y };
+  }
+
+  function applyAnim(el, a) {
+    el.style.setProperty('--dx1', a.dx1); el.style.setProperty('--dy1', a.dy1);
+    el.style.setProperty('--dx2', a.dx2); el.style.setProperty('--dy2', a.dy2);
+    el.style.setProperty('--dx3', a.dx3); el.style.setProperty('--dy3', a.dy3);
+    el.style.setProperty('--rs',  a.rs);  el.style.setProperty('--rm',  a.rm);
+    el.style.animationDuration = a.dur + 's';
+    el.style.animationDelay   = a.del + 's';
+    el.style.animationName    = 'tFloat';
+    el.style.animationTimingFunction = 'linear';
+    el.style.animationIterationCount = 'infinite';
+  }
+
+  function spawn(t, animate = false) {
+    if (live.has(t.id)) return;
+    const { x, y } = posFor(t);
+    const sty  = styleFor(t);
+    const size = t.pinned ? 'size-lg' : SIZES[Math.floor(Math.random()*SIZES.length)];
+    const a    = animFor(t);
+
+    const el = document.createElement('div');
+    el.className = `floating-thought ${sty} ${size}${t.pinned ? ' pinned' : ''}`;
+    el.dataset.id = t.id;
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+    el.innerHTML  = `<div class="thought-inner">${t.pinned ? '<span class="pin-dot"></span>' : ''}${esc(t.text)}</div>`;
+
+    if (animate) {
+      el.style.animation = 'tFadeIn .6s cubic-bezier(0.34,1.4,0.64,1) forwards';
+      setTimeout(() => applyAnim(el, animFor(t)), 660);
+    } else {
+      applyAnim(el, a);
+    }
+
+    // click → detail
+    el.addEventListener('click', () => App.openDetail(t.id));
+
+    // long-press → pin toggle
+    let lp = null;
+    el.addEventListener('pointerdown', () => { lp = setTimeout(() => { lp = null; const u = Store.update(t.id, { pinned: !t.pinned }); if (u) { Float.refresh(); App.toast(u.pinned ? '★ Pinned' : 'Unpinned'); } }, 600); });
+    el.addEventListener('pointerup',   () => clearTimeout(lp));
+    el.addEventListener('pointermove', () => clearTimeout(lp));
+
+    canvas.appendChild(el);
+    live.set(t.id, el);
+  }
+
+  function kill(id) {
+    const el = live.get(id); if (!el) return;
+    el.style.transition = 'opacity .4s ease, transform .4s ease';
+    el.style.opacity = '0'; el.style.transform = 'scale(.75)';
+    setTimeout(() => el.remove(), 430);
+    live.delete(id);
+  }
+
+  function refresh() {
+    const all = Store.load();
+    const ids = new Set(all.map(t => t.id));
+    live.forEach((_, id) => { if (!ids.has(id)) kill(id); });
+    const seen = new Set();
+    all.forEach(t => { if (!seen.has(t.id)) { seen.add(t.id); spawn(t, false); } });
+  }
+
+  return { spawn, kill, refresh };
+})();
+
+/* ════════════════════════════════════════════
+   APP / UI
+════════════════════════════════════════════ */
+const App = (() => {
+  const $ = id => document.getElementById(id);
+
+  // elements
+  const addBtn   = $('addBtn'),   modalOv  = $('modalOverlay');
+  const mClose   = $('modalClose'), mLabel = $('modalLabel');
+  const tInput   = $('thoughtInput'), saveB  = $('saveBtn');
+  const cCount   = $('charCount');
+  const focusOv  = $('focusOverlay'), focusTxt = $('focusText');
+  const focusMt  = $('focusMeta'),    pinB     = $('pinBtn');
+  const pinLbl   = $('pinLabel'),     editB    = $('editBtn');
+  const delB     = $('deleteBtn'),    closeF   = $('closeFocusBtn');
+  const srchTgl  = $('searchToggle'), srchPnl  = $('searchPanel');
+  const srchInp  = $('searchInput'),  srchRes  = $('searchResults');
+  const fmBtn    = $('focusModeBtn'), fmOv     = $('focusModeOverlay');
+  const fmTxt    = $('focusModeThought'), fmExit = $('focusModeExit');
+  const expBtn   = $('exportBtn'),    empty    = $('emptyState');
+  const dayRef   = $('dailyReflection'), dayTxt = $('dailyText');
+  const toastEl  = $('toast');
+
+  let editId = null, focId = null, toastT = null;
+
+  /* toast */
+  function toast(msg) {
+    clearTimeout(toastT); toastEl.textContent = msg;
+    toastEl.classList.add('visible');
+    toastT = setTimeout(() => toastEl.classList.remove('visible'), 2400);
+  }
+
+  /* empty state */
+  const syncEmpty = () => empty.classList.toggle('hidden', Store.load().length > 0);
+
+  /* daily reflection */
+  function initDaily() {
+    const all = Store.load(); if (!all.length) return;
+    const dk = new Date().toDateString(); let seed = 0;
+    for (let i = 0; i < dk.length; i++) seed += dk.charCodeAt(i);
+    const pool = all.filter(t => t.pinned).length ? all.filter(t => t.pinned) : all;
+    dayTxt.textContent = pool[seed % pool.length].text;
+    setTimeout(() => { dayRef.classList.add('visible'); setTimeout(() => dayRef.classList.remove('visible'), 7000); }, 2500);
+  }
+
+  /* modal open/close */
+  function openAdd() {
+    editId = null; mLabel.textContent = 'new thought';
+    tInput.value = ''; cCount.textContent = '0 / 280'; saveB.disabled = true;
+    modalOv.classList.add('open');
+    setTimeout(() => tInput.focus(), 220);
+  }
+  function openEdit(id) {
+    const t = Store.byId(id); if (!t) return;
+    editId = id; mLabel.textContent = 'edit thought';
+    tInput.value = t.text; cCount.textContent = t.text.length + ' / 280'; saveB.disabled = false;
+    closeDetail();
+    modalOv.classList.add('open');
+    setTimeout(() => { tInput.focus(); tInput.selectionStart = tInput.value.length; }, 220);
+  }
+  function closeModal() { modalOv.classList.remove('open'); tInput.blur(); }
+
+  /* save */
+  function save() {
+    const text = tInput.value.trim(); if (!text) return;
+    if (editId) {
+      Store.update(editId, { text }); Float.kill(editId);
+      setTimeout(() => { const t = Store.byId(editId); if (t) Float.spawn(t, true); }, 450);
+      toast('Thought updated');
+    } else {
+      Float.spawn(Store.add(text), true);
+      toast('Thought captured');
+    }
+    closeModal(); syncEmpty();
+  }
+
+  /* detail */
+  function openDetail(id) {
+    const t = Store.byId(id); if (!t) return;
+    focId = id;
+    const d = new Date(t.timestamp);
+    const ds = d.toLocaleDateString('en-US',{ month:'long', day:'numeric', year:'numeric' });
+    const ts = d.toLocaleTimeString('en-US',{ hour:'2-digit', minute:'2-digit' });
+    focusMt.innerHTML = `${t.pinned ? '<span class="pin-badge">★ pinned &nbsp;</span>' : ''}<span>${ds} · ${ts}</span>`;
+    focusTxt.textContent = t.text;
+    pinLbl.textContent = t.pinned ? 'Unpin' : 'Pin';
+    pinB.classList.toggle('active', t.pinned);
+    focusOv.classList.add('open');
+  }
+  function closeDetail() { focusOv.classList.remove('open'); focId = null; }
+
+  /* search */
+  function toggleSearch() {
+    const open = srchPnl.classList.toggle('open');
+    if (open) { setTimeout(() => srchInp.focus(), 320); renderSearch(''); }
+    else srchInp.value = '';
+  }
+  function renderSearch(q) {
+    const all = Store.load(), ql = q.toLowerCase().trim();
+    const fil = ql ? all.filter(t => t.text.toLowerCase().includes(ql)) : all;
+    if (!fil.length) { srchRes.innerHTML = `<div class="search-empty">${ql ? 'No thoughts found' : 'All your thoughts float below ↓'}</div>`; return; }
+    srchRes.innerHTML = fil.slice(0,10).map(t => {
+      const date = new Date(t.timestamp).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      return `<div class="search-result-item" data-id="${t.id}">
+        <div class="search-result-text">${esc(t.text)}</div>
+        <div class="search-result-date">${t.pinned ? '★ ' : ''}${date}</div>
+      </div>`;
+    }).join('');
+    srchRes.querySelectorAll('.search-result-item').forEach(el =>
+      el.addEventListener('click', () => { toggleSearch(); setTimeout(() => openDetail(el.dataset.id), 360); }));
+  }
+
+  /* focus mode */
+  function openFocusMode() {
+    const all = Store.load(); if (!all.length) { toast('Add some thoughts first'); return; }
+    const pool = all.filter(t => t.pinned).length ? all.filter(t => t.pinned) : all;
+    const t = pool[Math.floor(Math.random() * pool.length)];
+    fmTxt.style.animation = 'none'; void fmTxt.offsetHeight; fmTxt.style.animation = '';
+    fmTxt.textContent = t.text; fmOv.classList.add('active');
+  }
+  const closeFocusMode = () => fmOv.classList.remove('active');
+
+  /* export */
+  function exportAll() {
+    const all = Store.load(); if (!all.length) { toast('Nothing to export yet'); return; }
+    const txt = ['UNTITLED — Mind Reflection Diary', `Exported: ${new Date().toLocaleString()}`, '─'.repeat(40), '',
+      ...all.map(t => `${t.pinned ? '★ ' : ''}[${new Date(t.timestamp).toLocaleString()}]\n${t.text}\n`)].join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+    a.download = `untitled-diary-${Date.now()}.txt`; a.click();
+    URL.revokeObjectURL(a.href); toast('Exported ↓');
+  }
+
+  /* ── events ── */
+  addBtn.addEventListener('click', openAdd);
+  mClose.addEventListener('click', closeModal);
+  modalOv.addEventListener('click', e => { if (e.target === modalOv) closeModal(); });
+  tInput.addEventListener('input', () => { cCount.textContent = tInput.value.length + ' / 280'; saveB.disabled = !tInput.value.trim(); });
+  tInput.addEventListener('keydown', e => { if ((e.metaKey||e.ctrlKey) && e.key==='Enter') save(); if (e.key==='Escape') closeModal(); });
+  saveB.addEventListener('click', save);
+  closeF.addEventListener('click', closeDetail);
+  focusOv.addEventListener('click', e => { if (e.target === focusOv) closeDetail(); });
+
+  pinB.addEventListener('click', () => {
+    if (!focId) return;
+    const t = Store.byId(focId); if (!t) return;
+    const u = Store.update(focId, { pinned: !t.pinned });
+    Float.kill(focId); setTimeout(() => { if (u) Float.spawn(u, true); }, 450);
+    pinLbl.textContent = u.pinned ? 'Unpin' : 'Pin';
+    pinB.classList.toggle('active', u.pinned);
+    const d = new Date(u.timestamp);
+    focusMt.innerHTML = `${u.pinned ? '<span class="pin-badge">★ pinned &nbsp;</span>' : ''}<span>${d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span>`;
+    toast(u.pinned ? '★ Pinned' : 'Unpinned');
+  });
+
+  editB.addEventListener('click', () => { if (focId) openEdit(focId); });
+  delB.addEventListener('click', () => {
+    if (!focId) return;
+    Float.kill(focId); Store.remove(focId); closeDetail(); syncEmpty(); toast('Thought released');
+  });
+
+  srchTgl.addEventListener('click', toggleSearch);
+  srchInp.addEventListener('input', () => renderSearch(srchInp.value));
+  srchInp.addEventListener('keydown', e => { if (e.key==='Escape') toggleSearch(); });
+  fmBtn.addEventListener('click', openFocusMode);
+  fmExit.addEventListener('click', closeFocusMode);
+  fmOv.addEventListener('click', e => { if (e.target === fmOv) closeFocusMode(); });
+  expBtn.addEventListener('click', exportAll);
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (fmOv.classList.contains('active'))  { closeFocusMode(); return; }
+    if (focusOv.classList.contains('open')) { closeDetail();    return; }
+    if (modalOv.classList.contains('open')) { closeModal();     return; }
+    if (srchPnl.classList.contains('open')) { toggleSearch();   return; }
+  });
+
+  return { toast, openDetail, syncEmpty, initDaily };
+})();
+
+/* ════════════════════════════════════════════
+   UTILS + SEED + INIT
+════════════════════════════════════════════ */
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function seed() {
+  if (Store.load().length) return;
+  const items = [
+    { text:"I am capable of far more than I give myself credit for.", pinned:true  },
+    { text:"Every difficult moment is building something in me that ease never could.", pinned:false },
+    { text:"The version of me I'm becoming is worth every hard day.", pinned:false  },
+    { text:"Stillness is not weakness. It is where clarity lives.", pinned:false },
+    { text:"I don't need to be perfect. I need to be honest and keep moving.", pinned:false }
+  ];
+  items.forEach((s, i) => {
+    const all = Store.load();
+    all.push({ id:`seed_${i}`, text:s.text, timestamp:new Date(Date.now()-i*172800000).toISOString(), pinned:s.pinned });
+    localStorage.setItem('untitled_v2', JSON.stringify(all));
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  seed();
+  Float.refresh();
+  App.syncEmpty();
+  App.initDaily();
+});
+</script>
+</body>
+</html>
